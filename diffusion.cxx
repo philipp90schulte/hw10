@@ -1,3 +1,12 @@
+/**
+* Title: Homework 10 - Diffusion equitation solution with explicite algorithm
+* Author: Philipp Schulte
+* Date: 26.01.2015
+*
+* Description: Rewrite the FTCS method equitation to calculate the next timestep of the given Diffusion equitation.
+*
+*/
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -17,7 +26,7 @@ void step(double* const u1,  double* const u0,  const double dt,
 int main(){
 
   const double tEnd = 5 ;
-  const double D = 1;
+  const double D = 0.01;
 
   const int N  = 200;
   const double xmin = -20;
@@ -45,6 +54,13 @@ int main(){
   {
    for(int j=0; j<Nk; j++){
 
+	step(u1, u0, dt, dx, D, N);
+
+	// Perform triangle exchange
+	h = u0;
+	u0 = u1;
+	u1 = h;
+	t += dt; // new timestep 
 
    }
    strm.str("");
@@ -59,10 +75,22 @@ int main(){
   return 0;
 }
 //-----------------------------------------------
+// Every singel step is parted in three substeps:
+// 1. calculate the value for the new timestep for i = 0
+// 2. calculate the values for 1 <= i < N-2
+// 3. calculate the last x position / array element (N-1) 
+
 void step(double* const f1, double* const f0,
           const double dt, const double dx,
           const double D, const int N)
 {
+	f1[0] = f0[0] + ((D * dt) / (dx * dx)) * (f0[1] - 2 * f0[0]);
+	
+	for (int i = 1; i < N - 1; i++) {
+		f1[i] = f0[i] + ((D * dt) / (dx * dx)) * (f0[i+1] - 2 * f0[i] + f0[i-1]);
+	}
+	
+	f1[N-1] = f0[N-1] + ((D * dt) / (dx * dx)) * (- 2 * f0[N-1] + f0[N-2]);
 
 }
 //-----------------------------------------------
